@@ -51,6 +51,7 @@ public class ProcessCSSFilesTask extends ProcessFilesTask {
      * @param nosuffix whether to use a suffix for the minified file name or not
      * @param skipMerge whether to skip the merge step or not
      * @param skipMinify whether to skip the minify step or not
+     * @param skipSourceMap whether to skip the source mapping step or not
      * @param webappSourceDir web resources source directory
      * @param webappTargetDir web resources target directory
      * @param inputDir directory containing source files
@@ -63,23 +64,19 @@ public class ProcessCSSFilesTask extends ProcessFilesTask {
      * @param yuiConfig YUI Compressor configuration
      */
     public ProcessCSSFilesTask(Log log, boolean verbose, Integer bufferSize, String charset, String suffix,
-            boolean nosuffix, boolean skipMerge, boolean skipMinify, String webappSourceDir, String webappTargetDir,
-            String inputDir, List<String> sourceFiles, List<String> sourceIncludes, List<String> sourceExcludes,
-            String outputDir, String outputFilename, Engine engine, YuiConfig yuiConfig) {
-        super(log, verbose, bufferSize, charset, suffix, nosuffix, skipMerge, skipMinify, webappSourceDir,
+            boolean nosuffix, boolean skipMerge, boolean skipMinify, boolean skipSourceMap, String webappSourceDir, 
+            String webappTargetDir, String inputDir, List<String> sourceFiles, List<String> sourceIncludes, 
+            List<String> sourceExcludes, String outputDir, String outputFilename, Engine engine, YuiConfig yuiConfig) {
+        super(log, verbose, bufferSize, charset, suffix, nosuffix, skipMerge, skipMinify, skipSourceMap, webappSourceDir,
                 webappTargetDir, inputDir, sourceFiles, sourceIncludes, sourceExcludes, outputDir, outputFilename,
                 engine, yuiConfig);
     }
 
     /**
      * Minifies a CSS file.
-     *
-     * @param mergedFile input file resulting from the merged step
-     * @param minifiedFile output file resulting from the minify step
-     * @throws IOException when the minify step fails
      */
     @Override
-    protected void minify(File mergedFile, File minifiedFile) throws IOException {
+    protected void minify(List<File> sourceFiles, File mergedFile, File minifiedFile) throws IOException {
         try (InputStream in = new FileInputStream(mergedFile);
                 OutputStream out = new FileOutputStream(minifiedFile);
                 InputStreamReader reader = new InputStreamReader(in, charset);

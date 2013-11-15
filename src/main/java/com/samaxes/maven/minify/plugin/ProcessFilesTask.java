@@ -38,6 +38,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
+import com.google.common.collect.Lists;
 import com.samaxes.maven.minify.common.FilenameComparator;
 import com.samaxes.maven.minify.common.SourceFilesEnumeration;
 import com.samaxes.maven.minify.common.YuiConfig;
@@ -65,12 +66,14 @@ public abstract class ProcessFilesTask implements Callable<Object> {
     protected final boolean skipMerge;
 
     protected final boolean skipMinify;
+    
+    protected final boolean skipSourceMap;
 
     protected final Engine engine;
 
     protected final YuiConfig yuiConfig;
 
-    private final File sourceDir;
+    protected final File sourceDir;
 
     private final File targetDir;
 
@@ -106,9 +109,9 @@ public abstract class ProcessFilesTask implements Callable<Object> {
      * @param yuiConfig YUI Compressor configuration
      */
     public ProcessFilesTask(Log log, boolean verbose, Integer bufferSize, String charset, String suffix,
-            boolean nosuffix, boolean skipMerge, boolean skipMinify, String webappSourceDir, String webappTargetDir,
-            String inputDir, List<String> sourceFiles, List<String> sourceIncludes, List<String> sourceExcludes,
-            String outputDir, String outputFilename, Engine engine, YuiConfig yuiConfig) {
+            boolean nosuffix, boolean skipMerge, boolean skipMinify, boolean skipSourceMap, String webappSourceDir, 
+            String webappTargetDir, String inputDir, List<String> sourceFiles, List<String> sourceIncludes, 
+            List<String> sourceExcludes, String outputDir, String outputFilename, Engine engine, YuiConfig yuiConfig) {
         this.log = log;
         this.verbose = verbose;
         this.bufferSize = bufferSize;
@@ -117,6 +120,7 @@ public abstract class ProcessFilesTask implements Callable<Object> {
         this.nosuffix = nosuffix;
         this.skipMerge = skipMerge;
         this.skipMinify = skipMinify;
+        this.skipSourceMap = skipSourceMap;
         this.engine = engine;
         this.yuiConfig = yuiConfig;
 
@@ -162,7 +166,7 @@ public abstract class ProcessFilesTask implements Callable<Object> {
                         File minifiedFile = new File(targetPath, (nosuffix) ? mergedFile.getName()
                                 : FileUtils.basename(mergedFile.getName()) + suffix
                                         + FileUtils.getExtension(mergedFile.getName()));
-                        minify(mergedFile, minifiedFile);
+                        minify(Lists.newArrayList(mergedFile), mergedFile, minifiedFile);
                     }
                 } else if (skipMinify) {
                     File mergedFile = new File(targetDir, mergedFilename);
@@ -173,7 +177,7 @@ public abstract class ProcessFilesTask implements Callable<Object> {
                     merge(mergedFile);
                     File minifiedFile = new File(targetDir, (nosuffix) ? mergedFilename
                             : FileUtils.basename(mergedFilename) + suffix + FileUtils.getExtension(mergedFilename));
-                    minify(mergedFile, minifiedFile);
+                    minify(files, mergedFile, minifiedFile);
                     if (nosuffix) {
                         if (!mergedFile.delete()) {
                             mergedFile.deleteOnExit();
@@ -213,11 +217,12 @@ public abstract class ProcessFilesTask implements Callable<Object> {
     /**
      * Minifies a source file.
      *
+     * @param sourceFiles the unmerged files
      * @param mergedFile input file resulting from the merged step
      * @param minifiedFile output file resulting from the minify step
      * @throws IOException when the minify step fails
      */
-    abstract void minify(File mergedFile, File minifiedFile) throws IOException;
+    abstract void minify(List<File> sourceFiles, File mergedFile, File minifiedFile) throws IOException;
 
     /**
      * Logs compression gains.

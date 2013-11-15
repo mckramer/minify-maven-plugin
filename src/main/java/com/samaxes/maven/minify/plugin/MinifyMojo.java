@@ -127,6 +127,16 @@ public class MinifyMojo extends AbstractMojo {
      */
     @Parameter(property = "skipMinify", defaultValue = "false")
     private boolean skipMinify;
+    
+    /**
+     * Skip the source map generation step.  See 
+     * <a href="http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/">Introduction to 
+     * JavaScript Source Maps</a> for more information.
+     * 
+     * @since 1.7.3
+     */
+    @Parameter(property = "skipSourceMap", defaultValue = "false")
+    private boolean skipSourceMap;
 
     /**
      * Webapp source directory.
@@ -398,10 +408,10 @@ public class MinifyMojo extends AbstractMojo {
 
         Collection<ProcessFilesTask> processFilesTasks = new ArrayList<ProcessFilesTask>();
         processFilesTasks.add(new ProcessCSSFilesTask(getLog(), debug, bufferSize, charset, suffix, nosuffix,
-                skipMerge, skipMinify, webappSourceDir, webappTargetDir, cssSourceDir, cssSourceFiles,
+                skipMerge, skipMinify, skipSourceMap, webappSourceDir, webappTargetDir, cssSourceDir, cssSourceFiles,
                 cssSourceIncludes, cssSourceExcludes, cssTargetDir, cssFinalFile, cssEngine, yuiConfig));
         processFilesTasks.add(new ProcessJSFilesTask(getLog(), debug, bufferSize, charset, suffix, nosuffix, skipMerge,
-                skipMinify, webappSourceDir, webappTargetDir, jsSourceDir, jsSourceFiles, jsSourceIncludes,
+                skipMinify, skipSourceMap, webappSourceDir, webappTargetDir, jsSourceDir, jsSourceFiles, jsSourceIncludes,
                 jsSourceExcludes, jsTargetDir, jsFinalFile, jsEngine, yuiConfig, closureConfig));
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
