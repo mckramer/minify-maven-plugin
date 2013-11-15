@@ -79,7 +79,7 @@ public abstract class ProcessFilesTask implements Callable<Object> {
 
     private final String mergedFilename;
 
-    private final List<File> files = new ArrayList<File>();
+    private final List<File> files = Lists.newArrayList();
 
     private final boolean sourceFilesEmpty;
 
